@@ -6,6 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class DataCollectionDispatcherService extends BaseService {
 
@@ -25,6 +26,14 @@ public class DataCollectionDispatcherService extends BaseService {
 
     @Override
     protected String executeInternal(String input) throws Exception {
+        String[] splitted = input.split(":");
+        if (splitted.length != 2) {
+            throw new IllegalArgumentException("input malformed");
+        }
+
+        String customerId = splitted[0];
+        String targetFilename = splitted[1];
+
         /*
         int amountOfStations = getIdOfStations();
 
@@ -39,7 +48,7 @@ public class DataCollectionDispatcherService extends BaseService {
 
         for(Integer station_id: getListOfStationsId())
         {
-            Producer.send(input+":"+station_id+":"+getListOfStationsId().size(), "DATA COLLECTION", BROKER_URL);
+            Producer.send(customerId+":"+targetFilename+":"+station_id+":"+getListOfStationsId().size(), "DATA COLLECTION", BROKER_URL);
         }
 
         //Message an DataCollectionDispatcher
@@ -69,7 +78,7 @@ public class DataCollectionDispatcherService extends BaseService {
 
 
         } catch (SQLException e) {
-            throw new Exception(e.getNextException());
+            throw e;
         }
         return stations;
     }
